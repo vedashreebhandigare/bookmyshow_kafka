@@ -1,0 +1,102 @@
+version: '3.8'
+
+volumes:
+  mysql_data:
+
+services:
+  # ✅ Zookeeper for Kafka coordination
+  zookeeper:
+    image: confluentinc/cp-zookeeper:latest
+    container_name: zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+
+  # ✅ Kafka Message Broker
+  kafka:
+    image: confluentinc/cp-kafka:latest
+    container_name: kafka
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    healthcheck:
+      test: ["CMD", "nc", "-z", "localhost", "9092"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  # ✅ MySQL Database for seat bookings
+  mysql-db:
+    image: mysql:latest
+    container_name: mysql-db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: vedu
+      MYSQL_DATABASE: seat_booking_db
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./database/schema.sql:/docker-entrypoint-initdb.d/schema.sql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ✅ Booking Service (Flask API for seat booking)
+  booking-service:
+    build: ./booking-service
+    container_name: booking-service
+    depends_on:
+      - kafka
+      - mysql-db
+    ports:
+      - "5000:5000"
+    environment:
+      DATABASE_HOST: mysql-db
+      DATABASE_USER: root
+      DATABASE_PASSWORD: vedu
+      DATABASE_NAME: seat_booking_db
+      KAFKA_BROKER: kafka:9092
+    volumes:
+      - ./frontend:/frontend
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      
+  # ✅ Consumer Service (Consumes Kafka messages & updates database)
+  consumer-service:
+    build: ./consumer-service
+    container_name: consumer-service
+    depends_on:
+      - kafka
+      - mysql-db
+    ports:
+      - "5001:5001"
+    environment:
+      DATABASE_HOST: mysql-db
+      DATABASE_USER: root
+      DATABASE_PASSWORD: vedu
+      DATABASE_NAME: seat_booking_db
+      KAFKA_BROKER: kafka:9092
+    restart: always
+
+  # ✅ Frontend (Served using Nginx)
+  frontend:
+    image: nginx:alpine
+    container_name: frontend
+    volumes:
+      - ./frontend:/usr/share/nginx/html
+      - ./frontend/default.conf:/etc/nginx/conf.d/default.conf 
+    ports:
+      - "8080:80"
