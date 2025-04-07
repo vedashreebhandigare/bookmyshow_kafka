@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Payment - BookMyShow Clone</title>
+</head>
+<body style="font-family: Arial, sans-serif; background-color: #f7f7f7; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0;">
+
+  <div style="background-color: #fff; padding: 30px; border-radius: 12px; box-shadow: 0 0 20px rgba(0,0,0,0.1); max-width: 400px; width: 100%;">
+    <h2 style="text-align: center; color: #e50914;"> Payment Page</h2>
+    <p style="text-align: center; color: #333;">You're almost there! Confirm your payment to finalize the booking.</p>
+
+    <form id="payment-form" style="margin-top: 20px;">
+      <label for="card" style="display: block; margin-bottom: 6px; font-weight: bold;">Card Number:</label>
+      <input type="text" id="card" placeholder="1234 5678 9012 3456" style="width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 6px;">
+
+      <label for="name" style="display: block; margin-bottom: 6px; font-weight: bold;">Cardholder Name:</label>
+      <input type="text" id="name" placeholder="Your Name" style="width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 6px;">
+
+      <label for="cvv" style="display: block; margin-bottom: 6px; font-weight: bold;">CVV:</label>
+      <input type="password" id="cvv" placeholder="123" style="width: 100%; padding: 10px; margin-bottom: 20px; border: 1px solid #ccc; border-radius: 6px;">
+
+      <button type="submit" style="width: 100%; background-color: #e50914; color: #fff; padding: 12px; border: none; border-radius: 6px; font-size: 16px; cursor: pointer;">
+        Pay Now
+      </button>
+    </form>
+
+    <div id="booked-seats" style="margin-top: 20px; text-align: center; color: green;"></div>
+  </div>
+
+  <script>
+    document.getElementById("payment-form").addEventListener("submit", function(e) {
+      e.preventDefault();
+      alert("✅ Payment successful! Enjoy the show 🎬");
+      window.location.href = "/";
+    });
+
+    fetch('/api/booked-seats')
+  .then(response => response.json())
+  .then(data => {
+    const bookedSeats = data.booked_seats;
+    document.getElementById('booked-seats').innerHTML = `<h3>Booked Seats: ${bookedSeats.join(', ')}</h3>`;
+  })
+  .catch(error => {
+    console.error('Error fetching booked seats:', error);
+  });
+
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,53 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #121212;
+    color: white;
+    margin: 0;
+    padding: 0;
+}
+
+header {
+    background-color: #d32f2f;
+    padding: 5px;
+    text-align: center;
+    font-size: 24px;
+    font-weight: bold;
+}
+
+#movie-details {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    margin: 20px;
+    position: relative;
+    width: 80%; /* Set the width of the container to 80% */
+    max-width: 1200px; /* Set a max width for the image container */
+    margin: 20px auto; /* Center the container horizontally */
+}
+
+#movie-poster {
+    width: 100%; /* Make the image span the entire container width */
+    height: auto; /* Maintain aspect ratio of the image */
+    max-height: 600px; /* Limit the height of the image */
+    object-fit: cover; /* Ensure the image covers the container area without distortion */
+    border-radius: 10px; /* Optional: Rounded corners */
+}
+
+#book-tickets {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #e50914;
+    color: white;
+    padding: 15px 30px;
+    font-size: 18px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+#book-tickets:hover {
+    background-color: #b20710;
+}

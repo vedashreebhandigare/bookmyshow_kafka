@@ -1,0 +1,4 @@
+flask
+kafka-python
+flask-cors
+mysql-connector-python
